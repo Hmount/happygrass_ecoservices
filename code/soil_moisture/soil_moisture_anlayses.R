@@ -46,7 +46,7 @@ reduction.yr <- smdat.yr %>%
 
 ## mean reduction over course of experiment(currently only looks at
 ## 2021-2023).
-sum(reduction.yr$percent_reduction)/3 # = 9.3% mean reduction
+sum(reduction.yr$percent_reduction)/3 # = 9.3% mean reduction, w/ 2024 is = 13.31%
 
 
 ### Test and model differences in soil moisture 

@@ -1,10 +1,8 @@
 #### Soil moisture data wrangling and initial summary plot
 #### (code from happygrass-happyforb scripts)
 #### TO DO: 
-## 2024 growing season is incomplete! requested from Jules
-## Add 2024
-## make figure
-## calculate total percent reduction
+## add missing half of August + September for 2023! requested from Jules
+## remove probes/ ports with errors (from Jules notes)
 
 
 library(tidyverse)
@@ -17,7 +15,7 @@ sm.wy22 <- read.csv("data/soil_moisture_wy/Restoration_soilmoisture_2022.csv")
 sm.wy22 <- sm.wy22 %>% mutate(across(-1, as.numeric))
 sm.wy23 <- read.csv("data/soil_moisture_wy/Restoration_soilmoisture_2023(toAug).csv")
 sm.wy23 <- sm.wy23 %>% mutate(across(-1, as.numeric))
-sm.wy24 <- read.csv("data/soil_moisture_wy/Restoration_soilmoisture_2024.csv")
+sm.wy24 <- read.csv("data/soil_moisture_wy/Restoration_soilmoisture_2024_all.csv")
 sm.wy24 <- sm.wy24 %>% mutate(across(-1, as.numeric))
 sm.wy <- bind_rows(sm.wy21,sm.wy22,sm.wy23, sm.wy24) #combine all annual soil moisture data
 sm.wy <- sm.wy %>% mutate(Timestamp = mdy_hm(Measurement.Time))
