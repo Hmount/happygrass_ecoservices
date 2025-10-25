@@ -1,11 +1,14 @@
 #### Soil moisture analyses
 #### test for significant difference in soil moisture between 
-#### precipittaon treatments and seeding treatments
+#### precipitation treatments (and seeding treatments?)
 
-#### 4/3/25: some differences between soil moisture depending 
-#### on month and year, but less on drought trt (some interactions)
-#### Need to add 2024 growing season and I assume it will strengthen
-#### this relationship.
+#### 9/29/25: some differences between soil moisture depend on 
+#### month, but precipitation treatment, year, and their
+#### interaction are all significant in ANOVA.
+
+#### it is unclear which port goes to which seeding treatment.
+#### if we have these data we can assess otherwise this is
+#### more descriptive analysis than a function of CWMs.  
 
 library(tidyverse)
 
@@ -49,9 +52,22 @@ reduction.yr <- smdat.yr %>%
 sum(reduction.yr$percent_reduction)/3 # = 9.3% mean reduction, w/ 2024 is = 13.31%
 
 
-### Test and model differences in soil moisture 
+### Test and model differences in soil moisture by year and precipitation treatment
+
+### month does have a strong effect, but treatment, year, and interaction are all signfiggant with it
+### so leaving this model out right now.
 summary(lm(Moisture~Year*Month*Treatment, smdat))
+anova(lm(Moisture~Year*Month*Treatment, smdat))
 ggplot(smdat, aes(y=Moisture, x=Month, fill=Treatment))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
+  labs(y = "Soil Volumetric Water Content")+
+  facet_wrap(~Year, nrow=1)
+
+summary(lm(Moisture~Year*Treatment, smdat))
+anova(lm(Moisture~Year*Treatment, smdat))
+ggplot(smdat, aes(y=Moisture, x=Treatment, fill=Treatment))+
+  geom_boxplot()+
+  scale_fill_manual(values=c("skyblue","tomato2"))#+
   facet_wrap(~Year)
+

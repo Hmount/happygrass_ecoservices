@@ -37,6 +37,8 @@ sum(!is.na(subroo$final)) #remove 27 (194 replicates)
 
 #### Calculate change in weight
 decomp <- decomp %>% mutate(diff = final-initial)
+decomp <- decomp %>% mutate(pml = 1- (final/initial))
+
 #four teabags gained weight, must be error, remove
 decomp <- decomp %>% filter(diff <= 0) #also removes all NA
 
@@ -77,20 +79,20 @@ summary(lm(diff~trt*drought,data=subgreen)) # no differences in decomp
 ggplot(subgreen, aes(x=diff, fill=trt))+
   geom_boxplot()+
   facet_wrap(~drought)
-ggplot(subgreen, aes(y=diff, x=trt, fill=drought))+
+ggplot(subgreen, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))
 
 subroo <- decomp %>% filter(tea=="roobois")
-anova(lm(diff~trt*drought,data=subroo)) # differences in decomp
-summary(lm(diff~trt*drought,data=subroo)) # differences in decomp
+anova(lm(pml~trt*drought,data=subroo)) # differences in decomp
+summary(lm(pml~trt*drought,data=subroo)) # differences in decomp
 ##more decomp in ambient in FD (and DT) than R
 ##BUT less decomp in drought in FD (and DT) than R
 ggplot(subroo, aes(x=diff, fill=trt))+
   geom_boxplot()+
   facet_wrap(~drought)
 ## BEST PLOT
-ggplot(subroo, aes(y=diff, x=trt, fill=drought))+
+ggplot(subroo, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))
 ### all communities differ from random (because of precip trt effect)
@@ -101,30 +103,85 @@ ggplot(subroo, aes(y=diff, x=trt, fill=drought))+
 # 
 # 
 # #### with covers?
-# cover <- read.csv("data/cover_estimates/hpg_total.csv")
-# cover$trt <- toupper(cover$trt)
-# cover <- cover %>% filter(year == "2023")
-# alldat <- merge(decomp, cover[,c(1:4,12:14)], by.x=c("plot","trt"), by.y=c("block","trt"))
+cover <- read.csv("data/communities/comp_wy.csv")
+cover$trt <- toupper(cover$trt)
+cover <- cover %>% filter(year == "2023")
+alldat <- merge(decomp, cover[,c(1:4,7:9)], by.x=c("plot","trt"), by.y=c("block","trt"))
 # 
-# 
-# subgreen <- alldat %>% filter(tea=="green") 
-# summary(lm(diff~sub.tveg*trt,data=subgreen)) # small, but sig effect of species cover on decomp by trt
-# summary(lm(diff~sub.tveg*trt*drought,data=subgreen)) # better with drought
-# anova(lm(diff~sub.tveg*trt*drought,data=subgreen)) # all variables important
-# summary(lm(diff~Litter*trt,data=subgreen)) # no effect of species cover on decomp by trts
-# #viz
-# ggplot(subgreen, aes(y=diff, x=sub.tveg, color=trt))+
-#   #geom_point()+
-#   geom_smooth(method="lm")+
+# ggplot(alldat, aes(y=Litter, fill=trt))+
+#   geom_boxplot()+
 #   facet_wrap(~drought)
-# 
-# subroo <- alldat %>% filter(tea=="roobois")
-# summary(lm(diff~sub.tveg*trt,data=subroo)) # stronger sig effect of species cover on decomp by trt
-# summary(lm(diff~sub.tveg*trt*drought,data=subroo)) # even better with drought (20%)
-# anova(lm(diff~sub.tveg*trt*drought,data=subroo)) # all variables very important
-# summary(lm(diff~Litter*trt,data=subroo)) # lower R2 w/ litter by trt than OG model
-# #viz
-# ggplot(subroo, aes(y=diff, x=sub.tveg, color=trt))+
-#   #geom_point()+
-#   geom_smooth(method="lm")+
-#   facet_wrap(~drought)
+ggplot(alldat, aes(y=Litter, x=trt, fill = drought))+
+  geom_boxplot()
+
+ggplot(alldat, aes(y=totalcov, x=trt, fill = drought))+
+  geom_boxplot()
+
+subgreen <- alldat %>% filter(tea=="green") 
+dat <- subgreen[complete.cases(subgreen[, c("pml", "trt", "drought", "Litter")]), ]
+summary(mod2<-lm(pml~trt*drought*Litter,data=dat)) #not sig. ~2% variance explained
+summary(mod1<-lm(pml~trt*drought,data=dat)) #not sig. ~2% variance explained
+ggplot(subgreen, aes(y=pml, x=trt, fill=drought))+
+  geom_boxplot()+
+  scale_fill_manual(values=c("skyblue","tomato2"))
+anova(mod1,mod2)
+
+subrooibos <- alldat %>% filter(tea=="roobois") 
+dat <- subrooibos[complete.cases(subrooibos[, c("pml", "trt", "drought", "Litter")]), ]
+summary(mod3<-lm(pml~trt*drought,data=dat))#sig. ~16% variance explained
+summary(mod4<-lm(pml~trt*drought*Litter,data=dat))#sig. ~18% variance explained
+ggplot(subrooibos, aes(y=pml, x=trt, fill=drought))+
+  geom_boxplot()+
+  scale_fill_manual(values=c("skyblue","tomato2"))
+anova(mod3,mod4)
+
+
+ggplot(alldat, aes(y=pml, x=trt, fill=drought))+
+  geom_boxplot()+
+  scale_fill_manual(labels=c("Ambient","Drought"), values=c("skyblue","tomato2"))+
+  facet_wrap(~tea)
+
+
+### What about the relationship between CWM and services?
+comms23 <- read.csv("data/communities/validCWM23.csv")
+comms23$year <- "2023"
+#subset comms to just have CWM's for 10 best blocks with nutrient data
+subcomms <- comms23 %>% filter(block %in% unique(alldat$plot))
+#test <- subcomms %>% group_by(block,trt,year) %>%
+#merge with nutrient data
+subcomms$trt <- factor(toupper(as.character(subcomms$trt)))
+roocomms <- merge(subrooibos,subcomms, by.x=c("plot","trt"), by.y = c("block","trt"))
+greencomms <- merge(subgreen,subcomms, by.x=c("plot","trt"), by.y = c("block","trt"))
+
+#roo only
+#ldmc
+summary(glmmTMB::glmmTMB(pml ~ drought.x*ldmc+
+                           (1|plot), data=roocomms)) 
+modldmc<-ggplot(roocomms, aes(x=ldmc, y=pml, col=drought.x))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_fill_manual(values=c("skyblue","tomato2"))+
+  labs(col="Precipitation 
+Treatment")
+
+#rdmc
+summary(glmmTMB::glmmTMB(pml ~ drought.x*rdmc+
+                           (1|plot), data=roocomms)) 
+modrdmc<-ggplot(roocomms, aes(x=rdmc, y=pml, col=drought.x))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_fill_manual(values=c("skyblue","tomato2"))+
+  labs(col="Precipitation 
+Treatment")
+
+#srl
+summary(glmmTMB::glmmTMB(pml ~ drought.x*srl+
+                           (1|plot), data=roocomms)) 
+modsrl<-ggplot(roocomms, aes(x=srl, y=pml, col=drought.x))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_fill_manual(values=c("skyblue","tomato2"))+
+  labs(col="Precipitation 
+Treatment")
+
+ggarrange(modldmc,modrdmc,modsrl, common.legend = T)

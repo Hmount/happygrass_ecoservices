@@ -17,6 +17,7 @@ sm.wy23 <- read.csv("data/soil_moisture_wy/Restoration_soilmoisture_2023(toAug).
 sm.wy23 <- sm.wy23 %>% mutate(across(-1, as.numeric))
 sm.wy24 <- read.csv("data/soil_moisture_wy/Restoration_soilmoisture_2024_all.csv")
 sm.wy24 <- sm.wy24 %>% mutate(across(-1, as.numeric))
+ranges <- sapply(sm.wy22, range, na.rm = T)
 sm.wy <- bind_rows(sm.wy21,sm.wy22,sm.wy23, sm.wy24) #combine all annual soil moisture data
 sm.wy <- sm.wy %>% mutate(Timestamp = mdy_hm(Measurement.Time))
 
