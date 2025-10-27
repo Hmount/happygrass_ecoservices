@@ -30,12 +30,23 @@ foragedat$spcode <- str_replace(foragedat$spcode, "BRITE", "BRTE")
 foragedat$spcode <- str_replace(foragedat$spcode, "ARDR", "ARFR")
 
 ## check how different feed values are between species in drought/ control
-ggplot(foragedat, aes(x=RFV, y=spcode, shape=treatment))+
-  geom_point()
-ggplot(foragedat, aes(x=crudeprotien, y=spcode, shape=treatment))+
-  geom_point()
-ggplot(foragedat, aes(x=ADF, y=spcode, shape=treatment))+
-  geom_point()
+ggarrange(ggplot(foragedat, aes(x=RFV, y=spcode, col=treatment))+
+  geom_point()+
+    scale_color_manual(values=c("skyblue","tomato2","purple"), labels = c("ambient", "reduction","both"))+
+    theme_bw(),
+ggplot(foragedat, aes(x=crudeprotien, y=spcode, col=treatment))+
+  geom_point()+
+  scale_color_manual(values=c("skyblue","tomato2","purple"), labels = c("ambient", "reduction","both"))+
+  theme_bw(),
+ggplot(foragedat, aes(x=ADF, y=spcode, col=treatment))+
+  geom_point()+
+  scale_color_manual(values=c("skyblue","tomato2","purple"), labels = c("ambient", "reduction","both"))+
+  theme_bw(),
+ggplot(foragedat, aes(x=moisture, y=spcode, col=treatment))+
+  geom_point()+
+  scale_color_manual(values=c("skyblue","tomato2","purple"), labels = c("ambient", "reduction","both"))+
+  theme_bw(),
+common.legend = T)
 
 ### load in community composition data for weighted means
 comms <- read.csv("data/communities/comp_wy.csv")
@@ -79,41 +90,53 @@ foragemean.d$drought <- "drought"
 forageall <- rbind(foragemean.a, foragemean.d)
 
 ## plot
+summary(lmer(RFV ~ trt*drought+(1|block), forageall))
 m1 <- ggplot(forageall, aes(x=trt, y=RFV, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", fill="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
+summary(lmer(crudeprotien ~ trt*drought+(1|block), forageall))
 m2 <- ggplot(forageall, aes(x=trt, y=crudeprotien, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", fill="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
+summary(lmer(drymatter ~ trt*drought+(1|block), forageall)) #not sig.
 m3 <- ggplot(forageall, aes(x=trt, y=drymatter, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", fill="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
+summary(lmer(TDN ~ trt*drought+(1|block), forageall))
 m4 <- ggplot(forageall, aes(x=trt, y=TDN, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", fill="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
+summary(lmer(ADF ~ trt*drought+(1|block), forageall))
 m5 <- ggplot(forageall, aes(x=trt, y=ADF, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", fill="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
+summary(lmer(NDF ~ trt*drought+(1|block), forageall))
 m6 <- ggplot(forageall, aes(x=trt, y=NDF, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", fill="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
 #combined for report
 annotate_figure(ggarrange(m1,m2,m3,m4,m5,m6, common.legend = T, 
@@ -122,149 +145,129 @@ annotate_figure(ggarrange(m1,m2,m3,m4,m5,m6, common.legend = T,
 
 
 ### What about the relationship between CWM and services?
-comms21 <- read.csv("data/communities/validCWM21.csv")
-comms21$year <- "2021"
+# comms21 <- read.csv("data/communities/validCWM21.csv")
+# comms21$year <- "2021"
 comms23 <- read.csv("data/communities/validCWM23.csv")
-comms23$year <- "2023"
-comms <- bind_rows(comms21,comms23)
+# comms23$year <- "2023"
+# comms <- bind_rows(comms21,comms23)
 #subset comms to just have CWM's for 10 best blocks with nutrient data
 subcomms <- comms23 %>% filter(block %in% unique(forageall$plot))
 #test <- subcomms %>% group_by(block,trt,year) %>%
 #merge with nutrient data
 #subcomms$trt <- factor(toupper(as.character(subcomms$trt)))
 foragecomms <- merge(forageall,comms23, by.x=c("block","trt","subplot"), by.y = c("block","trt","subplot"))
-foragecomms <- foragecomms %>% unite(plot, block, trt, sep=".")
+#foragecomms <- foragecomms %>% unite(plot, block, trt, sep=".")
   
 #only signifigant nutreint~trait models retained below
 #Total N
-summary(glmmTMB::glmmTMB(RFV ~ drought.x*ldmc + (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*ldmc+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*ldmc+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(drymatter ~ drought.x*ldmc+ (1|plot), data=foragecomms)) #only ldmc
+summary(glmmTMB::glmmTMB(RFV ~ drought.x*ldmc + (1|block), data=foragecomms)) 
+summary(glmmTMB::glmmTMB(ADF ~ drought.x*ldmc+ (1|block), data=foragecomms))
+summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*ldmc+ (1|block), data=foragecomms)) 
+summary(glmmTMB::glmmTMB(drymatter ~ drought.x*ldmc+ (1|block), data=foragecomms))
 
 rvfldmc<-ggplot(foragecomms, aes(x=ldmc, y=RFV, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")#+
+Treatment")+
+  theme_bw()#+
   #facet_wrap(~year.x)
 cpldmc<-ggplot(foragecomms, aes(x=ldmc, y=crudeprotien, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 adfldmc<-ggplot(foragecomms, aes(x=ldmc, y=ADF, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 dmldmc<-ggplot(foragecomms, aes(x=ldmc, y=drymatter, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
-summary(glmmTMB::glmmTMB(RFV ~ drought.x*leafn + (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*leafn+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*leafn+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(drymatter ~ drought.x*leafn+ (1|plot), data=foragecomms)) #only ldmc
+summary(glmmTMB::glmmTMB(RFV ~ drought.x*leafn + (1|block), data=foragecomms)) 
+summary(glmmTMB::glmmTMB(ADF ~ drought.x*leafn+ (1|block), data=foragecomms)) 
+summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*leafn+ (1|block), data=foragecomms)) 
+summary(glmmTMB::glmmTMB(drymatter ~ drought.x*leafn+ (1|block), data=foragecomms))
 
 rvfln<-ggplot(foragecomms, aes(x=leafn, y=RFV, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")#+
+Treatment")+
+  theme_bw()#+
 #facet_wrap(~year.x)
 cpln<-ggplot(foragecomms, aes(x=leafn, y=crudeprotien, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 adfln<-ggplot(foragecomms, aes(x=leafn, y=ADF, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 dmln<-ggplot(foragecomms, aes(x=leafn, y=drymatter, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
-summary(glmmTMB::glmmTMB(RFV ~ drought.x*sla + (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*sla+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*sla+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(drymatter ~ drought.x*sla+ (1|plot), data=foragecomms)) #only ldmc
+summary(glmmTMB::glmmTMB(RFV ~ drought.x*sla + (1|block), data=foragecomms)) 
+summary(glmmTMB::glmmTMB(ADF ~ drought.x*sla+ (1|block), data=foragecomms))
+summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*sla+ (1|block), data=foragecomms))
+summary(glmmTMB::glmmTMB(drymatter ~ drought.x*sla+ (1|block), data=foragecomms))
 
 rvfsla<-ggplot(foragecomms, aes(x=sla, y=RFV, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")#+
+Treatment")+
+  theme_bw()#+
 #facet_wrap(~year.x)
 cpsla<-ggplot(foragecomms, aes(x=sla, y=crudeprotien, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 adfsla<-ggplot(foragecomms, aes(x=sla, y=ADF, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 dmsla<-ggplot(foragecomms, aes(x=sla, y=drymatter, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
 
-summary(glmmTMB::glmmTMB(RFV ~ drought.x*lop + (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*lop+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*lop+ (1|plot), data=foragecomms)) #only ldmc
-summary(glmmTMB::glmmTMB(drymatter ~ drought.x*lop+ (1|plot), data=foragecomms)) #only ldmc
 
-rvflop<-ggplot(foragecomms, aes(x=lop, y=RFV, col=drought.x))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")#+
-#facet_wrap(~year.x)
-cplop<-ggplot(foragecomms, aes(x=lop, y=crudeprotien, col=drought.x))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")
-adflop<-ggplot(foragecomms, aes(x=lop, y=ADF, col=drought.x))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")
-dmlop<-ggplot(foragecomms, aes(x=lop, y=drymatter, col=drought.x))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")
-
-
-test<-ggarrange(rvfldmc,cpldmc,adfldmc,dmldmc,
+ggarrange(rvfldmc,cpldmc,adfldmc,dmldmc,
           rvfln,cpln,adfln,dmln,
           rvfsla,cpsla,adfsla,dmsla,
-          rvflop,cplop,adflop,dmlop,
-          ncol=4, nrow=4, common.legend = T)
+          ncol=4, nrow=3, common.legend = T)

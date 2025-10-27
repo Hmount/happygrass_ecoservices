@@ -54,20 +54,26 @@ sum(reduction.yr$percent_reduction)/3 # = 9.3% mean reduction, w/ 2024 is = 13.3
 
 ### Test and model differences in soil moisture by year and precipitation treatment
 
-### month does have a strong effect, but treatment, year, and interaction are all signfiggant with it
-### so leaving this model out right now.
+### month does have a strong effect, use this figure for short report, but 
+### we are likely only interested in the effect of year (below)
 summary(lm(Moisture~Year*Month*Treatment, smdat))
 anova(lm(Moisture~Year*Month*Treatment, smdat))
+#figure in replort:
 ggplot(smdat, aes(y=Moisture, x=Month, fill=Treatment))+
   geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato2"))+
-  labs(y = "Soil Volumetric Water Content")+
-  facet_wrap(~Year, nrow=1)
+  scale_fill_manual(values=c("skyblue","tomato2"), labels = c("ambient", "reduction"))+
+  labs(y = "Soil Volumetric Water Content", fill= "Precipitation 
+treatment")+
+  facet_wrap(~Year, nrow=1)+
+  theme_bw()
 
+#jtheme_minimal()#just year
+#dry years have stronger effect and drt only matters in dry years
 summary(lm(Moisture~Year*Treatment, smdat))
 anova(lm(Moisture~Year*Treatment, smdat))
+summary(lm(Moisture~Treatment, smdat))
 ggplot(smdat, aes(y=Moisture, x=Treatment, fill=Treatment))+
   geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato2"))#+
+  scale_fill_manual(values=c("skyblue","tomato2"))+
   facet_wrap(~Year)
 

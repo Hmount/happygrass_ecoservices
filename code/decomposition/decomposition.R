@@ -129,17 +129,21 @@ anova(mod1,mod2)
 subrooibos <- alldat %>% filter(tea=="roobois") 
 dat <- subrooibos[complete.cases(subrooibos[, c("pml", "trt", "drought", "Litter")]), ]
 summary(mod3<-lm(pml~trt*drought,data=dat))#sig. ~16% variance explained
-summary(mod4<-lm(pml~trt*drought*Litter,data=dat))#sig. ~18% variance explained
+summary(mod4<-lmer(pml~trt*drought+(1|plot),data=dat))
 ggplot(subrooibos, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))
-anova(mod3,mod4)
+AIC(mod3,mod4) #spatial random effect does improve model
 
 
 ggplot(alldat, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(labels=c("Ambient","Drought"), values=c("skyblue","tomato2"))+
-  facet_wrap(~tea)
+  labs(fill="Precipitation 
+treatment")+
+  facet_wrap(~tea)+
+  scale_y_continuous(labels = scales::percent)+
+  theme_bw()
 
 
 ### What about the relationship between CWM and services?
@@ -154,34 +158,50 @@ roocomms <- merge(subrooibos,subcomms, by.x=c("plot","trt"), by.y = c("block","t
 greencomms <- merge(subgreen,subcomms, by.x=c("plot","trt"), by.y = c("block","trt"))
 
 #roo only
+#sla
+summary(glmmTMB::glmmTMB(pml ~ drought.x*sla+
+                           (1|plot), data=roocomms)) #not sig
+modsla<-ggplot(roocomms, aes(x=sla, y=pml, col=drought.x))+
+  geom_point()+
+  geom_smooth(method = "lm", lty=2)+
+  scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
+  labs(col="Precipitation 
+Treatment")+
+  theme_bw()
+
 #ldmc
 summary(glmmTMB::glmmTMB(pml ~ drought.x*ldmc+
-                           (1|plot), data=roocomms)) 
+                           (1|plot), data=roocomms)) #yes, sig.
 modldmc<-ggplot(roocomms, aes(x=ldmc, y=pml, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
-  scale_fill_manual(values=c("skyblue","tomato2"))+
+  scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
-#rdmc
-summary(glmmTMB::glmmTMB(pml ~ drought.x*rdmc+
-                           (1|plot), data=roocomms)) 
-modrdmc<-ggplot(roocomms, aes(x=rdmc, y=pml, col=drought.x))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_fill_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")
 
 #srl
 summary(glmmTMB::glmmTMB(pml ~ drought.x*srl+
-                           (1|plot), data=roocomms)) 
+                           (1|plot), data=roocomms)) #yes sig.
 modsrl<-ggplot(roocomms, aes(x=srl, y=pml, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
-  scale_fill_manual(values=c("skyblue","tomato2"))+
+  scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
   labs(col="Precipitation 
-Treatment")
+Treatment")+
+  theme_bw()
 
-ggarrange(modldmc,modrdmc,modsrl, common.legend = T)
+#rdmc
+summary(glmmTMB::glmmTMB(pml ~ drought.x*rdmc+
+                           (1|plot), data=roocomms)) #yes sig.
+modrdmc<-ggplot(roocomms, aes(x=rdmc, y=pml, col=drought.x))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
+  labs(col="Precipitation 
+Treatment")+
+  theme_bw()
+
+
+ggarrange(modsla,modldmc,modsrl,modrdmc, common.legend = T)

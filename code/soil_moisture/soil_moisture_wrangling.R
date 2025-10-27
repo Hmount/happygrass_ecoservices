@@ -1,8 +1,7 @@
 #### Soil moisture data wrangling and initial summary plot
 #### (code from happygrass-happyforb scripts)
 #### TO DO: 
-## add missing half of August + September for 2023! requested from Jules
-## remove probes/ ports with errors (from Jules notes)
+## remove probes/ ports with errors? (from Jules notes)
 
 
 library(tidyverse)
