@@ -20,90 +20,90 @@ nut23$comm <- as.factor(nut23$comm)
 nut23$drt <- as.factor(nut23$drt)
 nut23 <- nut23 %>%
   mutate(comm = relevel(comm, ref = "R"))
-
-### 21
-### all (except K) are signifigantly different, but only by drt trt
-summary(lm(TotalN ~ drt*comm, data=nut21)) #sig. diff. drt trt + IR
-anova(lm(TotalN ~ drt*comm, data=nut21))
-m1 <- ggplot(nut21, aes(y=TotalN, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-  #scale_fill_manual(values=c("#482576B3", "#2A788EB3", "#43BF71B3", "#FDE725B3"))
-
-summary(lm(NO3 ~ drt*comm, data=nut21)) #sig. diff. drt trt + IR
-anova(lm(NO3 ~ drt*comm, data=nut21))
-m2 <- ggplot(nut21, aes(y=NO3, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(P ~ drt*comm, data=nut21)) #sig. diff. drt trt
-anova(lm(P ~ drt*comm, data=nut21))
-m3 <- ggplot(nut21, aes(y=P, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(K ~ drt*comm, data=nut21)) #not sig. (but DT ?)
-anova(lm(K ~ drt*comm, data=nut21))
-m4 <- ggplot(nut21, aes(y=K, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(Ca ~ drt*comm, data=nut21)) #sig. diff. drt trt + drt*FD
-anova(lm(Ca ~ drt*comm, data=nut21))
-m5 <- ggplot(nut21, aes(y=Ca, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(Mg ~ drt*comm, data=nut21)) #sig. diff. drt trt + drt*FD
-anova(lm(Mg ~ drt*comm, data=nut21))
-m6 <- ggplot(nut21, aes(y=Mg, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-#combine plot
-library(ggpubr)
-annotate_figure(ggarrange(m1,m2,m3,m4,m5,m6, common.legend = T), top="2021")
-
-### 23
-### only P is signifigantly different
-summary(lm(TotalN ~ drt*comm, data=nut23)) #not sig.
-anova(lm(TotalN ~ drt*comm, data=nut23))
-m7 <- ggplot(nut23, aes(y=TotalN, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(NO3 ~ drt*comm, data=nut23)) #not sig.
-anova(lm(NO3 ~ drt*comm, data=nut23))
-m8 <- ggplot(nut23, aes(y=NO3, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(P ~ drt*comm, data=nut23)) #sig. diff. drt trt
-anova(lm(P ~ drt*comm, data=nut23))
-m9 <- ggplot(nut23, aes(y=P, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(K ~ drt*comm, data=nut23)) #not sig.
-anova(lm(K ~ drt*comm, data=nut23))
-m10 <- ggplot(nut23, aes(y=K, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(Ca ~ drt*comm, data=nut23)) #not sig.
-anova(lm(Ca ~ drt*comm, data=nut23))
-m11 <- ggplot(nut23, aes(y=Ca, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-summary(lm(Mg ~ drt*comm, data=nut23)) #not sig.
-anova(lm(Mg ~ drt*comm, data=nut23))
-m12 <- ggplot(nut23, aes(y=Mg, x=comm, fill=drt))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato"))
-
-#combine plot
-annotate_figure(ggarrange(m7,m8,m9,m10,m11,m12, common.legend = T), top="2023")
+# 
+# ### 21
+# ### all (except K) are signifigantly different, but only by drt trt
+# summary(lm(TotalN ~ drt*comm, data=nut21)) #sig. diff. drt trt + IR
+# anova(lm(TotalN ~ drt*comm, data=nut21))
+# m1 <- ggplot(nut21, aes(y=TotalN, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+#   #scale_fill_manual(values=c("#482576B3", "#2A788EB3", "#43BF71B3", "#FDE725B3"))
+# 
+# summary(lm(NO3 ~ drt*comm, data=nut21)) #sig. diff. drt trt + IR
+# anova(lm(NO3 ~ drt*comm, data=nut21))
+# m2 <- ggplot(nut21, aes(y=NO3, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(P ~ drt*comm, data=nut21)) #sig. diff. drt trt
+# anova(lm(P ~ drt*comm, data=nut21))
+# m3 <- ggplot(nut21, aes(y=P, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(K ~ drt*comm, data=nut21)) #not sig. (but DT ?)
+# anova(lm(K ~ drt*comm, data=nut21))
+# m4 <- ggplot(nut21, aes(y=K, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(Ca ~ drt*comm, data=nut21)) #sig. diff. drt trt + drt*FD
+# anova(lm(Ca ~ drt*comm, data=nut21))
+# m5 <- ggplot(nut21, aes(y=Ca, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(Mg ~ drt*comm, data=nut21)) #sig. diff. drt trt + drt*FD
+# anova(lm(Mg ~ drt*comm, data=nut21))
+# m6 <- ggplot(nut21, aes(y=Mg, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# #combine plot
+# library(ggpubr)
+# annotate_figure(ggarrange(m1,m2,m3,m4,m5,m6, common.legend = T), top="2021")
+# 
+# ### 23
+# ### only P is signifigantly different
+# summary(lm(TotalN ~ drt*comm, data=nut23)) #not sig.
+# anova(lm(TotalN ~ drt*comm, data=nut23))
+# m7 <- ggplot(nut23, aes(y=TotalN, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(NO3 ~ drt*comm, data=nut23)) #not sig.
+# anova(lm(NO3 ~ drt*comm, data=nut23))
+# m8 <- ggplot(nut23, aes(y=NO3, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(P ~ drt*comm, data=nut23)) #sig. diff. drt trt
+# anova(lm(P ~ drt*comm, data=nut23))
+# m9 <- ggplot(nut23, aes(y=P, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(K ~ drt*comm, data=nut23)) #not sig.
+# anova(lm(K ~ drt*comm, data=nut23))
+# m10 <- ggplot(nut23, aes(y=K, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(Ca ~ drt*comm, data=nut23)) #not sig.
+# anova(lm(Ca ~ drt*comm, data=nut23))
+# m11 <- ggplot(nut23, aes(y=Ca, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# summary(lm(Mg ~ drt*comm, data=nut23)) #not sig.
+# anova(lm(Mg ~ drt*comm, data=nut23))
+# m12 <- ggplot(nut23, aes(y=Mg, x=comm, fill=drt))+
+#   geom_boxplot()+
+#   scale_fill_manual(values=c("skyblue","tomato"))
+# 
+# #combine plot
+# annotate_figure(ggarrange(m7,m8,m9,m10,m11,m12, common.legend = T), top="2023")
 
 
 ### together?
@@ -119,6 +119,9 @@ nut21$drt <- gsub("drt", "drought", nut21$drt)
 nut <- bind_rows(nut21,nut23)
 nut$year <- as.factor(nut$year)
 nut$drt <- as.factor(nut$drt)
+nut <- nut %>% filter(comm != "IR")
+nut$comm <- as.factor(nut$comm)
+nut <- nut %>% mutate(comm =relevel(comm, ref="R"))
 
 #Total N
 summary(lm(TotalN ~ drt*comm*year, data=nut)) #only drought and year matter
@@ -317,3 +320,4 @@ Treatment")+
 annotate_figure(ggarrange(m19,m20,m21,m22,m23,m24, m25, m26, common.legend = T, 
                           nrow=4, ncol=2),
                 bottom = "CWM trait")
+

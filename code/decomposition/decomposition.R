@@ -55,7 +55,7 @@ decomp$plot <- as.factor(decomp$plot)
 decomp$tea <- as.factor(decomp$tea)
 decomp$trt <- as.factor(decomp$trt)
 decomp$trt <- relevel(decomp$trt, ref = "R")
-
+decomp <- decomp %>% filter(trt != "IR")
 
 # how much data per trt
 teagab_summary <- decomp %>% group_by(trt,tea) %>% summarise(count = n())
@@ -103,57 +103,100 @@ ggplot(subroo, aes(y=pml, x=trt, fill=drought))+
 # 
 # 
 # #### with covers?
-cover <- read.csv("data/communities/comp_wy.csv")
+cover <- read.csv("data/communities/comp_wy_plot.csv")
 cover$trt <- toupper(cover$trt)
 cover <- cover %>% filter(year == "2023")
-alldat <- merge(decomp, cover[,c(1:4,7:9)], by.x=c("plot","trt"), by.y=c("block","trt"))
+alldat <- merge(decomp, cover[,c(1:3,62:65)], by.x=c("plot","trt"), by.y=c("block","trt"))
 # 
 # ggplot(alldat, aes(y=Litter, fill=trt))+
 #   geom_boxplot()+
 #   facet_wrap(~drought)
-ggplot(alldat, aes(y=Litter, x=trt, fill = drought))+
+ggplot(alldat, aes(y=lit.plotmean, x=trt, fill = drought))+
   geom_boxplot()
 
 ggplot(alldat, aes(y=totalcov, x=trt, fill = drought))+
   geom_boxplot()
 
 subgreen <- alldat %>% filter(tea=="green") 
-dat <- subgreen[complete.cases(subgreen[, c("pml", "trt", "drought", "Litter")]), ]
-summary(mod2<-lm(pml~trt*drought*Litter,data=dat)) #not sig. ~2% variance explained
-summary(mod1<-lm(pml~trt*drought,data=dat)) #not sig. ~2% variance explained
+dat <- subgreen[complete.cases(subgreen[, c("pml", "trt", "drought", "lit.plotmean")]), ]
+summary(mod2<-lmer(pml~trt*drought*lit.plotmean+(1|plot),data=dat)) #not sig. ~2% variance explained
+summary(mod1<-lmer(pml~trt*drought+(1|plot),data=dat)) #not sig. ~2% variance explained
 ggplot(subgreen, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))
 anova(mod1,mod2)
 
-subrooibos <- alldat %>% filter(tea=="roobois") 
-dat <- subrooibos[complete.cases(subrooibos[, c("pml", "trt", "drought", "Litter")]), ]
-summary(mod3<-lm(pml~trt*drought,data=dat))#sig. ~16% variance explained
-summary(mod4<-lmer(pml~trt*drought+(1|plot),data=dat))
-ggplot(subrooibos, aes(y=pml, x=trt, fill=drought))+
-  geom_boxplot()+
-  scale_fill_manual(values=c("skyblue","tomato2"))
-AIC(mod3,mod4) #spatial random effect does improve model
+summary(mod <- lmer(pml ~ trt*drought+(1|plot), subgreen))
+emm_trt <- emmeans(mod, ~ trt * drought)
+cld_res <- multcomp::cld(emm_trt, adjust = "tukey", Letters=letters)
+letters_df <- as.data.frame(cld_res)
+dttemp2 <- subgreen %>%
+  group_by(trt, drought) %>%
+  summarise(yposition = quantile(pml,.8, na.rm = T), .groups = 'drop')
+dttemp2 <- merge(letters_df, dttemp2, by = c("drought", "trt"))
+dttemp3 <- merge(subgreen, dttemp2, by = c("drought", "trt"), all = TRUE)
 
-
-ggplot(alldat, aes(y=pml, x=trt, fill=drought))+
+greenplot <- ggplot(dttemp3, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(labels=c("Ambient","Drought"), values=c("skyblue","tomato2"))+
   labs(fill="Precipitation 
 treatment")+
+  geom_text(aes(y=yposition,label = .group), 
+            position = position_dodge(width = .85), 
+            vjust = -1.75,
+            hjust = .6,
+            size=3)+
+  facet_wrap(~tea)+
+  scale_y_continuous(labels = scales::percent)+
+  theme_bw()
+  
+  
+
+subrooibos <- alldat %>% filter(tea=="roobois") 
+dat <- subrooibos[complete.cases(subrooibos[, c("pml", "trt", "drought", "lit.plotmean")]), ]
+summary(mod3<-lmer(pml~trt*drought*lit.plotmean+(1|plot),data=dat))#sig. ~16% variance explained
+summary(mod4<-lmer(pml~trt*drought+(1|plot),data=dat))
+ggplot(subrooibos, aes(y=pml, x=trt, fill=drought))+
+  geom_boxplot()+
+  scale_fill_manual(values=c("skyblue","tomato2"))
+anova(mod3,mod4) #spatial random effect does improve model
+
+summary(mod <- lmer(pml ~ trt*drought+(1|plot), subrooibos))
+emm_trt <- emmeans(mod, ~ trt * drought)
+cld_res <- multcomp::cld(emm_trt, adjust = "tukey", Letters=letters)
+letters_df <- as.data.frame(cld_res)
+dttemp2 <- subrooibos %>%
+  group_by(trt, drought) %>%
+  summarise(yposition = quantile(pml,.8, na.rm = T), .groups = 'drop')
+dttemp2 <- merge(letters_df, dttemp2, by = c("drought", "trt"))
+dttemp3 <- merge(subrooibos, dttemp2, by = c("drought", "trt"), all = TRUE)
+
+rooplot<- ggplot(dttemp3, aes(y=pml, x=trt, fill=drought))+
+  geom_boxplot()+
+  scale_fill_manual(labels=c("Ambient","Drought"), values=c("skyblue","tomato2"))+
+  labs(fill="Precipitation 
+treatment")+
+  geom_text(aes(y=yposition,label = .group), 
+            position = position_dodge(width = .85), 
+            vjust = -1.75,
+            hjust = .6,
+            size=3)+
   facet_wrap(~tea)+
   scale_y_continuous(labels = scales::percent)+
   theme_bw()
 
 
+#figure for report
+ggarrange(greenplot, rooplot, common.legend = T)
+
+
+
 ### What about the relationship between CWM and services?
 comms23 <- read.csv("data/communities/validCWM23.csv")
 comms23$year <- "2023"
-#subset comms to just have CWM's for 10 best blocks with nutrient data
-subcomms <- comms23 %>% filter(block %in% unique(alldat$plot))
 #test <- subcomms %>% group_by(block,trt,year) %>%
 #merge with nutrient data
-subcomms$trt <- factor(toupper(as.character(subcomms$trt)))
+comms$trt <- factor(toupper(as.character(comms$trt)))
 roocomms <- merge(subrooibos,subcomms, by.x=c("plot","trt"), by.y = c("block","trt"))
 greencomms <- merge(subgreen,subcomms, by.x=c("plot","trt"), by.y = c("block","trt"))
 

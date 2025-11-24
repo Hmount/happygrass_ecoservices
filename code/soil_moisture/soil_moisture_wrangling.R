@@ -102,7 +102,7 @@ smwy_seedtrt <- merge(sm.wy.long, seedtrtkey, by=c("Block","Port"))
 
 smwy_seedtrt <- (smwy_seedtrt %>% mutate(Date = floor_date(Timestamp, unit = "day"))
                     %>% select(Date, Block, trt, seedtrt, Moisture)
-                    %>% group_by(seedtrt, trt, Date)
+                    %>% group_by(Block,seedtrt, trt, Date)
                     %>% summarize(Moisture = mean(Moisture, na.rm = TRUE))
                     %>% arrange(trt, seedtrt, Date))
 
