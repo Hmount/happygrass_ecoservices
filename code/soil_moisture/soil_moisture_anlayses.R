@@ -89,6 +89,7 @@ anova(lm(mean~seedtrt, reducdataframe))
 ### Test and model differences in soil moisture by year and precipitation treatment
 ### and seeding treatment
 smdatsub <- smdat %>% filter(Year=="2022"|Year=="2023")
+smdatsub <- smdat %>% filter(Year=="2022"|Year=="2023")
 
 summary(lm(Moisture~Year*Month*seedtrt*droughttrt, smdatsub))
 anova(lm(Moisture~Year*Month*seedtrt*droughttrt, smdat))
@@ -116,6 +117,9 @@ treatment")+
   #facet_grid(Year~Month)
   theme_bw()
 
+#for just 2023
+smdatsub <- smdat %>% filter(Year=="2023")
+summary(smmod <- glmmTMB::glmmTMB(Moisture~seedtrt*droughttrt+(1|Block), smdatsub))
 
 ## ~ seeding treatment
 #create letters for plotting:

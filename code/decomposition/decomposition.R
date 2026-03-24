@@ -75,7 +75,7 @@ ggplot(decomp, aes(x=diff, fill=drought))+
 #### Initial analyses ####
 subgreen <- decomp %>% filter(tea=="green") 
 anova(lm(diff~trt*drought,data=subgreen)) # no differences in decomp
-summary(lm(diff~trt*drought,data=subgreen)) # no differences in decomp
+summary(decompgreenmod <- glmmTMB::glmmTMB(diff~trt*drought+(1|plot),data=subgreen)) # no differences in decomp
 ggplot(subgreen, aes(x=diff, fill=trt))+
   geom_boxplot()+
   facet_wrap(~drought)
@@ -84,8 +84,8 @@ ggplot(subgreen, aes(y=pml, x=trt, fill=drought))+
   scale_fill_manual(values=c("skyblue","tomato2"))
 
 subroo <- decomp %>% filter(tea=="roobois")
+summary(decomproomod <- glmmTMB::glmmTMB(pml~trt*drought+(1|plot),data=subroo)) # differences in decomp
 anova(lm(pml~trt*drought,data=subroo)) # differences in decomp
-summary(lm(pml~trt*drought,data=subroo)) # differences in decomp
 ##more decomp in ambient in FD (and DT) than R
 ##BUT less decomp in drought in FD (and DT) than R
 ggplot(subroo, aes(x=diff, fill=trt))+

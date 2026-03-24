@@ -1,4 +1,5 @@
-#### Productivty (ANPP)
+#### Productivity (ANPP)
+#### just using 2023 for now (3/23/26)
 
 library(tidyverse)
 
@@ -22,24 +23,55 @@ coverdat <- coverdat %>%
 coverdat <- coverdat %>% unite("plot",block,trt, sep="_", remove=F)
 coverdat <- coverdat %>% mutate(invasivecover = totcov.plot-nativecov.plot)
 
-summary(lm(totcov.plot ~ trt*drought2*year, data=coverdat)) #no seed trt differences
+#summary(covmod<-lmer(totcov.plot ~ trt*drought2*year + (1|plot), data=coverdat)) #no seed trt differences
 #summary(lmer(totcov.plot ~ drought3*trt+(1|block), data=coverdat)) #no seed trt differences
 #random plot effect did not improve the model (convergence)
-anova(covmod <- lm(totcov.plot ~ trt*drought2*year, data=coverdat))
+covsub <- coverdat %>% filter(year=="2023")
+covsub$block <- as.factor(covsub$block)
+summary(covmod <- glmmTMB::glmmTMB(totcov.plot ~ trt*drought2+(1|block), data=covsub))
 
-ggplot(coverdat, aes(x = trt, y = invasivecover, color = drought2)) +
-  stat_summary(fun = mean,
-               fun.data = mean_se,
-               geom = "pointrange",
-               position = position_dodge(width = 0.3)) +
-  scale_y_continuous(labels = scales::percent) +
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(y = "Total absolute cover", x = "Seeding treatment",
+### Also invader relative abundance/ proportion (better than total invasive
+### cover because there were more invasive in the drought treatment in 2023
+### due to open area in the drought plots from extreme ambient drought in 2022)
+### proportion is capturing dynamics of invasive colonization
+covsub <- covsub %>% mutate(propinv = invasivecover / totcov.plot)
+#summary(covmod <- glmmTMB::glmmTMB(invasivecover ~ trt*drought2+(1|block), data=covsub))
+summary(invmod <- glmmTMB::glmmTMB(propinv ~ trt*drought2+(1|block), data=covsub))
+ggplot(covsub, aes(x = trt, y = propinv, fill = drought2)) +
+  geom_boxplot()+
+  # stat_summary(fun = mean,
+  #              fun.data = mean_se,
+  #              geom = "pointrange",
+  #              position = position_dodge(width = 0.3)) +
+  #scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values=c("skyblue","tomato2"))+
+  labs(y = "Proportion invasive cover", x = "Seeding treatment",
        color = "Precipitation Treatment") +
-  theme_bw()+
-  facet_wrap(~year)
+  theme_bw()
 
+##examine invader richness (little to no difference, and a lot of variance 
+## is being absorbed by plot, so not using)
+#   covsub <- covsub %>%
+#     rowwise() %>%
+#     mutate(
+#       richness = sum(c_across(38:62) != 0 & !is.na(c_across(38:62)))
+#     ) %>%
+#     ungroup()
+# summary(covmod <- lmer(richness ~ trt*drought2+(1|block), data=covsub))
 
+## figures
+  ggplot(covsub, aes(x = trt, y = totcov.plot, fill = drought2)) +
+    geom_boxplot()+
+    # stat_summary(fun = mean,
+    #              fun.data = ggpubr::mean_sd,
+    #              geom = "pointrange",
+    #              position = position_dodge(width = 0.3)) +
+    #scale_y_continuous(labels = scales::percent) +
+    scale_fill_manual(values=c("skyblue","tomato2"))+
+    labs(y = "Total absolute cover", x = "Seeding treatment",
+         color = "Precipitation Treatment") +
+    theme_bw()
+  
 ## ~ seeding treatment
 #create letters for plotting:
 library(emmeans)
@@ -81,12 +113,13 @@ covtrtplot <- ggplot(dttemp3, aes(x = trt, y = totcov.plot, fill = drought2)) +
   #### CWM's and FD and soil moisture
   # comms21 <- read.csv("data/communities/validCWM21.csv")
   # comms21$year <- "2021"
-  comms22 <- read.csv("data/communities/validCWM22.csv")
-  comms22$year <- "2022"
+  # comms22 <- read.csv("data/communities/validCWM22.csv")
+  # comms22$year <- "2022"
   #comms <- bind_rows(comms21,comms22)
   comms23 <- read.csv("data/communities/validCWM23.csv")
   comms23$year <- "2023"
-  comms <- bind_rows(comms22,comms23)
+  comms <- comms23
+  #comms <- bind_rows(comms22,comms23)
   comms <- comms %>% filter(trt!="ir")
   #subcomms$trt <- factor(toupper(as.character(subcomms$trt)))
   prod.comms.cwm <- merge(coverdat,comms, 
@@ -159,8 +192,8 @@ treatment")+
     facet_wrap(~year)+
     theme_classic() +
    theme(axis.title.y.left = element_blank())
- 
-  
+ cor(prod.comms.fd[, c("ldmc", "rootdiam", "full")])
+ vif(mm)
   
   library(ggpubr)
   #ggarrange(covldmcplot, covfdrdplot, covfullplot, common.legend = T, nrow=3)
@@ -170,3 +203,17 @@ annotate_figure(
             #covfullplot, 
             common.legend = T, nrow=3), 
   left = "Total absolute plant cover")
+
+
+
+
+
+summary(m1<-lmer(totcov.plot ~ drought2*full*year+(1|plot.x), data=prod.comms.fd)) 
+summary(m2<-lmer(totcov.plot ~ drought2*ldmc*year+(1|plot.x), data=prod.comms.fd))
+summary(m3<-lmer(totcov.plot ~ drought2*trt*year+(1|plot.x), data=prod.comms.fd)) 
+AIC(m1,m2,m3)
+summary(lmer(cover ~ drought2*CWMLDMC*year+(1|block), data=prod.comms.fd)) 
+summary(lmer(decomp ~ drought2*trt*year+(1|block), data=prod.comms.fd)) 
+
+
+

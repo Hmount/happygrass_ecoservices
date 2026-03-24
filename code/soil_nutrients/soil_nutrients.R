@@ -136,9 +136,12 @@ Treatment")+
 
   
 #NO3
+nut23 <- nut23 %>% filter(comm!="IR")
+summary(nutmod<-glmmTMB::glmmTMB(P ~ drt*comm+(1|plot), data=nut23)) #only drought and drought*year matter
+
 summary(lm(NO3 ~ drt*comm*year, data=nut)) #only drought and drought*year matter
 anova(lm(NO3 ~ drt*comm*year, data=nut)) #only drt*year interaction matters
-m14<-ggplot(nut, aes(x=comm, y=NO3, fill=drt))+
+m14<-ggplot(nut23, aes(x=comm, y=NO3, fill=drt))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"), labels = c("ambient", "reduction"))+
   labs(x=" ", fill="Precipitation 
