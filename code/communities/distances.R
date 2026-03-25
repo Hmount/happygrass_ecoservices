@@ -223,8 +223,8 @@ fddistances <- fddistances %>% rownames_to_column("trt.b.y")
 # rdist <- alldat %>% filter(trt=="rand") %>% arrange(year,block)#%>% filter(year=="2021")
 # rdist0 <- rdist %>% filter(year=="0") %>% arrange(as.numeric(block))
 
-rdist <- alldat %>% arrange(year,block)
-rdist0 <- rdist %>% filter(year=="0") %>% arrange(as.numeric(block))
+# rdist <- alldat %>% arrange(year,block)
+# rdist0 <- rdist %>% filter(year=="0") %>% arrange(as.numeric(block))
 
 ### get CWM of intended CWM from seeding random communities 
 precommscwm <- read.csv("data/communities/cwm_wy.csv")
@@ -286,6 +286,7 @@ ggplot(alldist2, aes(y=targetdist, x=trt))+
 ggplot(alldist2, aes(y=distdt, x=trt))+
   geom_boxplot()+
   facet_wrap(~year)
+summary(lm(distfd~trt*year, alldist2))
 ggplot(alldist2, aes(y=distfd, x=trt))+
   geom_boxplot()+
   facet_wrap(~year)

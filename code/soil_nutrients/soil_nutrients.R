@@ -8,12 +8,12 @@
 library(tidyverse)
 
 # data
-nut21 <- read.csv("data/nutrients2021.csv", header=TRUE) #2021
-nut21$plot <- as.factor(nut21$plot)
-nut21$comm <- as.factor(nut21$comm)
-nut21$drt <- as.factor(nut21$drt)
-nut21 <- nut21 %>%
-  mutate(comm = relevel(comm, ref = "RA"))
+# nut21 <- read.csv("data/nutrients2021.csv", header=TRUE) #2021
+# nut21$plot <- as.factor(nut21$plot)
+# nut21$comm <- as.factor(nut21$comm)
+# nut21$drt <- as.factor(nut21$drt)
+# nut21 <- nut21 %>%
+#   mutate(comm = relevel(comm, ref = "RA"))
 nut23 <- read.csv("data/nutrients2023.csv", header=TRUE) #2023
 nut23$plot <- as.factor(nut23$plot)
 nut23$comm <- as.factor(nut23$comm)
@@ -107,17 +107,18 @@ nut23 <- nut23 %>%
 
 
 ### together?
-nut23 <-nut23 %>% select(-X,-X.1,-X.2, -X..Anion, -X..Cation) %>% #remove empty columns
-  mutate(year = "2023")
-nut23$drt <- gsub("control", "ambient", nut23$drt)
-nut21 <-nut21 %>% select(-Anion, -Cation) %>% #remove misnamed columns (just probe numbers)
-  mutate(year = "2021")
-nut21$comm <- gsub("RA", "R", nut21$comm)
-nut21$drt <- gsub("amb", "ambient", nut21$drt)
-nut21$drt <- gsub("drt", "drought", nut21$drt)
-
-nut <- bind_rows(nut21,nut23)
-nut$year <- as.factor(nut$year)
+# nut23 <-nut23 %>% select(-X,-X.1,-X.2, -X..Anion, -X..Cation) %>% #remove empty columns
+#   mutate(year = "2023")
+# nut23$drt <- gsub("control", "ambient", nut23$drt)
+# nut21 <-nut21 %>% select(-Anion, -Cation) %>% #remove misnamed columns (just probe numbers)
+#   mutate(year = "2021")
+# nut21$comm <- gsub("RA", "R", nut21$comm)
+# nut21$drt <- gsub("amb", "ambient", nut21$drt)
+# nut21$drt <- gsub("drt", "drought", nut21$drt)
+# 
+# nut <- bind_rows(nut21,nut23)
+nut <- nut23
+#nut$year <- as.factor(nut$year)
 nut$drt <- as.factor(nut$drt)
 nut <- nut %>% filter(comm != "IR")
 nut$comm <- as.factor(nut$comm)
@@ -138,7 +139,6 @@ Treatment")+
 #NO3
 nut23 <- nut23 %>% filter(comm!="IR")
 summary(nutmod<-glmmTMB::glmmTMB(P ~ drt*comm+(1|plot), data=nut23)) #only drought and drought*year matter
-
 summary(lm(NO3 ~ drt*comm*year, data=nut)) #only drought and drought*year matter
 anova(lm(NO3 ~ drt*comm*year, data=nut)) #only drt*year interaction matters
 m14<-ggplot(nut23, aes(x=comm, y=NO3, fill=drt))+
@@ -146,7 +146,7 @@ m14<-ggplot(nut23, aes(x=comm, y=NO3, fill=drt))+
   scale_fill_manual(values=c("skyblue","tomato2"), labels = c("ambient", "reduction"))+
   labs(x=" ", fill="Precipitation 
 Treatment")+
-  facet_wrap(~year)+
+  #facet_wrap(~year)+
   theme_bw()
 
 
@@ -205,11 +205,12 @@ annotate_figure(ggarrange(m13,m14,m15,m16,m17,m18, common.legend = T,
 
 
 ### What about the relationship between CWM and services?
-comms21 <- read.csv("data/communities/validCWM21.csv")
-comms21$year <- "2021"
+# comms21 <- read.csv("data/communities/validCWM21.csv")
+# comms21$year <- "2021"
 comms23 <- read.csv("data/communities/validCWM23.csv")
 comms23$year <- "2023"
-comms <- bind_rows(comms21,comms23)
+#comms <- bind_rows(comms21,comms23)
+comms <- comms23
 #subset comms to just have CWM's for 10 best blocks with nutrient data
 subcomms <- comms %>% filter(block %in% unique(nut$plot))
 #test <- subcomms %>% group_by(block,trt,year) %>%
@@ -231,96 +232,134 @@ Treatment")+
   theme_bw()
 
 #Total N ~ srl (higher srl could relate to more root turnover or foraging in low N)
-summary(glmmTMB::glmmTMB(TotalN ~ drt*srl*year.x+
+summary(glmmTMB::glmmTMB(NO3 ~ drt*ldmc+
              (1|plot), data=nutcomms)) #not very sig.
-m20<-ggplot(nutcomms, aes(x=srl, y=TotalN, col=drt))+
+nutldmcplot<-ggplot(nutcomms, aes(x=ldmc, y=NO3, col=drt))+
   geom_point()+
-  geom_smooth(method = "lm", lty=2)+
+  geom_smooth(method = "lm", se=F)+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
 Treatment")+
-  facet_wrap(~year.x)+
+  #facet_wrap(~year.x)+
   theme_bw()
+# 
+# 
+# #P ~ leaf N (n and p are related in leaf chemistry and soil colimitation?)
+# summary(glmmTMB::glmmTMB(P ~ drt*leafn*year.x+
+#                            (1|plot), data=nutcomms)) #not sig.
+# ggplot(nutcomms, aes(x=TotalN, y=P, col=drt))+
+#   geom_point()+
+#   geom_smooth(method="lm", lty=2)+
+#   facet_wrap(~year.x)
+# m21<-ggplot(nutcomms, aes(x=leafn, y=P, col=drt))+
+#   geom_point()+
+#   geom_smooth(method = "lm", lty=2)+
+#   scale_color_manual(values=c("skyblue","tomato2"))+
+#   labs(col="Precipitation 
+# Treatment")+
+#   facet_wrap(~year.x)+
+#   theme_bw()
+# 
+# #P ~ srl (increased when foraging for P?)
+# summary(glmmTMB::glmmTMB(P ~ drt*srl*year.x+
+#                            (1|plot), data=nutcomms)) #not sig.
+# m22<-ggplot(nutcomms, aes(x=srl, y=P, col=drt))+
+#   geom_point()+
+#   geom_smooth(method = "lm", lty=2)+
+#   scale_color_manual(values=c("skyblue","tomato2"))+
+#   labs(col="Precipitation 
+# Treatment")+
+#   facet_wrap(~year.x)+
+#   theme_bw()
+# 
+# #K ~ sla (low pottassium soil requires plants with acquisitive traits to forage)
+# summary(glmmTMB::glmmTMB(K ~ drt*sla*year.x+
+#                            (1|plot), data=nutcomms)) 
+# m23<-ggplot(nutcomms, aes(x=srl, y=K, col=drt))+
+#   geom_point()+
+#   geom_smooth(method = "lm")+
+#   scale_color_manual(values=c("skyblue","tomato2"))+
+#   labs(col="Precipitation 
+# Treatment")+
+#   facet_wrap(~year.x)+
+#   theme_bw()
+# 
+# #K ~ srl (low pottassium soil requires plants with acquisitive traits to forage)
+# summary(glmmTMB::glmmTMB(K ~ drt*srl*year.x+
+#                            (1|plot), data=nutcomms)) 
+# m24<-ggplot(nutcomms, aes(x=srl, y=K, col=drt))+
+#   geom_point()+
+#   geom_smooth(method = "lm")+
+#   scale_color_manual(values=c("skyblue","tomato2"))+
+#   labs(col="Precipitation 
+# Treatment")+
+#   facet_wrap(~year.x)+
+#   theme_bw()
+# 
+# #Ca ~ sla (kandlikar2022 predicts trade-off relationship)
+# summary(glmmTMB::glmmTMB(Ca ~ drt*sla*year.x+
+#                            (1|plot), data=nutcomms)) 
+# m25<-ggplot(nutcomms, aes(x=sla, y=Ca, col=drt))+
+#   geom_point()+
+#   geom_smooth(method = "lm")+
+#   scale_color_manual(values=c("skyblue","tomato2"))+
+#   labs(col="Precipitation 
+# Treatment")+
+#   facet_wrap(~year.x)+
+#   theme_bw()
+# 
+# #Ca ~ ldmc (leaf structure, pos. cor.?)
+# summary(glmmTMB::glmmTMB(Ca ~ drt*ldmc*year.x+
+#                            (1|plot), data=nutcomms)) #trait not sig.
+# m26<-ggplot(nutcomms, aes(x=ldmc, y=Ca, col=drt))+
+#   geom_point()+
+#   geom_smooth(method = "lm",lty=2)+
+#   scale_color_manual(values=c("skyblue","tomato2"))+
+#   labs(col="Precipitation 
+# Treatment")+
+#   facet_wrap(~year.x)+
+#   theme_bw()
+# 
+# #combined for report
+# annotate_figure(ggarrange(m19,m20,m21,m22,m23,m24, m25, m26, common.legend = T, 
+#                           nrow=4, ncol=2),
+#                 bottom = "CWM trait")
+# 
+### What about the relationship between CWM and services?
+# comms21 <- read.csv("data/communities/validCWM21.csv")
+# comms21$year <- "2021"
+comms23.fd <- read.csv("data/communities/FD23.csv")
+comms23.fd$year <- "2023"
+#comms <- bind_rows(comms21,comms23)
+comms.fd <- comms23.fd
+#subset comms to just have CWM's for 10 best blocks with nutrient data
+subcomms.fd <- comms.fd %>% filter(block %in% unique(nut$plot))
+#test <- subcomms %>% group_by(block,trt,year) %>%
+#merge with nutrient data
+subcomms.fd$trt <- factor(toupper(as.character(subcomms.fd$trt)))
+nutcomms.fd <- merge(nut,subcomms.fd, by.x=c("plot","comm"), by.y = c("block","trt"))
 
-
-#P ~ leaf N (n and p are related in leaf chemistry and soil colimitation?)
-summary(glmmTMB::glmmTMB(P ~ drt*leafn*year.x+
-                           (1|plot), data=nutcomms)) #not sig.
-ggplot(nutcomms, aes(x=TotalN, y=P, col=drt))+
+## running models we expect traits to influence nutrients 
+#Total N ~ leaf N (leaves uptake and return N to soil. these two pools of N should be correlated)
+summary(glmmTMB::glmmTMB(NO3 ~ drt*rootdiam+
+                           (1|plot), data=nutcomms.fd)) 
+nutfdrdplot<-ggplot(nutcomms.fd, aes(x=rootdiam, y=NO3, col=drt))+
   geom_point()+
-  geom_smooth(method="lm", lty=2)+
-  facet_wrap(~year.x)
-m21<-ggplot(nutcomms, aes(x=leafn, y=P, col=drt))+
-  geom_point()+
-  geom_smooth(method = "lm", lty=2)+
+  geom_smooth(method = "lm", se=F)+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
 Treatment")+
-  facet_wrap(~year.x)+
+  #facet_wrap(~year.x)+
   theme_bw()
 
-#P ~ srl (increased when foraging for P?)
-summary(glmmTMB::glmmTMB(P ~ drt*srl*year.x+
-                           (1|plot), data=nutcomms)) #not sig.
-m22<-ggplot(nutcomms, aes(x=srl, y=P, col=drt))+
+#Total N ~ srl (higher srl could relate to more root turnover or foraging in low N)
+summary(glmmTMB::glmmTMB(NO3 ~ drt*full+
+                           (1|plot), data=nutcomms.fd)) #not very sig.
+nutfullplot<-ggplot(nutcomms.fd, aes(x=full, y=NO3, col=drt))+
   geom_point()+
-  geom_smooth(method = "lm", lty=2)+
+  geom_smooth(method = "lm", se=F)+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
 Treatment")+
-  facet_wrap(~year.x)+
+  #facet_wrap(~year.x)+
   theme_bw()
-
-#K ~ sla (low pottassium soil requires plants with acquisitive traits to forage)
-summary(glmmTMB::glmmTMB(K ~ drt*sla*year.x+
-                           (1|plot), data=nutcomms)) 
-m23<-ggplot(nutcomms, aes(x=srl, y=K, col=drt))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")+
-  facet_wrap(~year.x)+
-  theme_bw()
-
-#K ~ srl (low pottassium soil requires plants with acquisitive traits to forage)
-summary(glmmTMB::glmmTMB(K ~ drt*srl*year.x+
-                           (1|plot), data=nutcomms)) 
-m24<-ggplot(nutcomms, aes(x=srl, y=K, col=drt))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")+
-  facet_wrap(~year.x)+
-  theme_bw()
-
-#Ca ~ sla (kandlikar2022 predicts trade-off relationship)
-summary(glmmTMB::glmmTMB(Ca ~ drt*sla*year.x+
-                           (1|plot), data=nutcomms)) 
-m25<-ggplot(nutcomms, aes(x=sla, y=Ca, col=drt))+
-  geom_point()+
-  geom_smooth(method = "lm")+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")+
-  facet_wrap(~year.x)+
-  theme_bw()
-
-#Ca ~ ldmc (leaf structure, pos. cor.?)
-summary(glmmTMB::glmmTMB(Ca ~ drt*ldmc*year.x+
-                           (1|plot), data=nutcomms)) #trait not sig.
-m26<-ggplot(nutcomms, aes(x=ldmc, y=Ca, col=drt))+
-  geom_point()+
-  geom_smooth(method = "lm",lty=2)+
-  scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(col="Precipitation 
-Treatment")+
-  facet_wrap(~year.x)+
-  theme_bw()
-
-#combined for report
-annotate_figure(ggarrange(m19,m20,m21,m22,m23,m24, m25, m26, common.legend = T, 
-                          nrow=4, ncol=2),
-                bottom = "CWM trait")
-
