@@ -75,7 +75,7 @@ summary(decompgreenmod <- glmmTMB::glmmTMB(diff~trt*drought+(1|plot),data=subgre
 ggplot(subgreen, aes(x=diff, fill=trt))+
   geom_boxplot()+
   facet_wrap(~drought)
-ggplot(subgreen, aes(y=pml, x=trt, fill=drought))+
+decompgplot<-ggplot(subgreen, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))
 
@@ -88,7 +88,7 @@ ggplot(subroo, aes(x=diff, fill=trt))+
   geom_boxplot()+
   facet_wrap(~drought)
 ## BEST PLOT
-ggplot(subroo, aes(y=pml, x=trt, fill=drought))+
+decomprplot<-ggplot(subroo, aes(y=pml, x=trt, fill=drought))+
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))
 ### all communities differ from random (because of precip trt effect)
@@ -209,24 +209,24 @@ greencomms <- merge(subgreen,subcomms, by.x=c("plot","trt"), by.y = c("block","t
 #   theme_bw()
 
 #ldmc
-summary(glmmTMB::glmmTMB(pml ~ drought.x*ldmc+
+summary(deccomprmod_ldmc<-glmmTMB::glmmTMB(pml ~ drought.x*ldmc+
                            (1|plot), data=roocomms)) #yes, sig.
 rooldmcplot<-ggplot(roocomms, aes(x=ldmc, y=pml, col=drought.x))+
   geom_point()+
-  geom_smooth(method = "lm")+
+  #geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
   labs(col="Precipitation 
-Treatment", y="Precent mass loss (rooibos)")+
+Treatment", y="Precent mass loss \n(rooibos)", x="CWM LDMC")+
   theme_classic()
 
-summary(glmmTMB::glmmTMB(pml ~ drought.x*ldmc+
+summary(deccompgmod_ldmc<-glmmTMB::glmmTMB(pml ~ drought.x*ldmc+
                            (1|plot), data=greencomms)) #yes, sig.
 greenldmcplot<-ggplot(greencomms, aes(x=ldmc, y=pml, col=drought.x))+
   geom_point()+
-  geom_smooth(method = "lm")+
+  #geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
   labs(col="Precipitation 
-Treatment",y="Precent mass loss (rooibos)")+
+Treatment",y="Precent mass loss \n(green)", x="CWM LDMC")+
   theme_classic()
 
 # #srl
@@ -301,26 +301,30 @@ Treatment", y="Precent mass loss (green)")+
   theme_classic()
 
 #ldmc
-summary(glmmTMB::glmmTMB(pml ~ drought.x*rootdiam+
+summary(deccomprmod_full<-glmmTMB::glmmTMB(pml ~ drought.x*full+
                            (1|plot), data=roocomms.fd)) #yes, sig.
-roofullplot<-ggplot(roocomms.fd, aes(x=rootdiam, y=pml, col=drought.x))+
+roofullplot<-ggplot(roocomms.fd, aes(x=full, y=pml, col=drought.x))+
   geom_point()+
-  geom_smooth(method = "lm")+
+  #geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
   labs(col="Precipitation 
-Treatment", y="Precent mass loss (rooibos)")+
-  theme_classic()
+Treatment", y="Precent mass loss \n (rooibos)", x= "FD")+
+  theme_classic()+
+  theme(axis.title.y.left = element_blank())
+
 
 #FULL
-summary(glmmTMB::glmmTMB(pml ~ drought.x*full+
+summary(deccompgmod_full<-glmmTMB::glmmTMB(pml ~ drought.x*full+
                            (1|plot), data=greencomms.fd)) #yes, sig.
 greenfullplot<-ggplot(greencomms.fd, aes(x=full, y=pml, col=drought.x))+
   geom_point()+
-  geom_smooth(method = "lm")+
+  #geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"),labels = c("ambient", "reduction"))+
   labs(col="Precipitation 
-Treatment", y="Precent mass loss (green)")+
-  theme_classic()
+Treatment", y="Precent mass loss (green)", x="FD")+
+  theme_classic()+
+  theme(axis.title.y.left = element_blank())
+  
 # #srl
 # summary(glmmTMB::glmmTMB(pml ~ drought.x*srl+
 #                            (1|plot), data=roocomms)) #yes sig.

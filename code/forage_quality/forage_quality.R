@@ -228,16 +228,16 @@ treatment")+
 
 
 summary(cpmod <- glmmTMB::glmmTMB(crudeprotien ~ trt*drought+(1|block), forageall23))
-emm_trt <- emmeans(cpmod, ~ trt * drought*year)
+emm_trt <- emmeans(cpmod, ~ trt * drought)
 cld_res <- multcomp::cld(emm_trt, adjust = "tukey", Letters=letters)
 letters_df <- as.data.frame(cld_res)
-dttemp2 <- forageall %>%
-  group_by(trt, drought, year) %>%
+dttemp2 <- forageall23 %>%
+  group_by(trt, drought) %>%
   summarise(yposition = quantile(crudeprotien,.8, na.rm = T), .groups = 'drop')
-dttemp2 <- merge(letters_df, dttemp2, by = c("drought", "trt","year"))
-dttemp3 <- merge(forageall, dttemp2, by = c("drought", "trt","year"), all = TRUE)
+dttemp2 <- merge(letters_df, dttemp2, by = c("drought", "trt"))
+dttemp3 <- merge(forageall23, dttemp2, by = c("drought", "trt"), all = TRUE)
 
-m2 <- ggplot(dttemp3, aes(x=trt, y=crudeprotien, fill=drought)) +
+cptrtplot <- ggplot(dttemp3, aes(x=trt, y=crudeprotien, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", y="Crude Protien", fill="Precipitation 
@@ -247,7 +247,7 @@ treatment")+
             vjust = -1.75,
             hjust = .6,
             size=3)+
-  facet_wrap(~year)+
+  #facet_wrap(~year)+
   theme_bw()
 
 
@@ -308,7 +308,7 @@ dttemp2 <- forageall23 %>%
 dttemp2 <- merge(letters_df, dttemp2, by = c("drought", "trt"))
 dttemp3 <- merge(forageall23, dttemp2, by = c("drought", "trt"), all = TRUE)
 
-m5 <- ggplot(dttemp3, aes(x=trt, y=ADF, fill=drought)) +
+adftrtpplot <- ggplot(dttemp3, aes(x=trt, y=ADF, fill=drought)) +
   geom_boxplot()+
   scale_fill_manual(values=c("skyblue","tomato2"))+
   labs(x=" ", y="ADF", fill="Precipitation 
@@ -369,8 +369,8 @@ foragecomms <- merge(forageall23,comms, by.x=c("block","trt"), by.y = c("block",
 #only signifigant nutreint~trait models retained below
 #Total N
 summary(glmmTMB::glmmTMB(RFV ~ drought.x*ldmc*year.x + (1|block), data=foragecomms)) 
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*ldmc+ (1|block), data=foragecomms))
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*ldmc+ (1|block), data=foragecomms)) 
+summary(adfmod_ldmc<-glmmTMB::glmmTMB(ADF ~ drought.x*ldmc+ (1|block), data=foragecomms))
+summary(cpmod_ldmc <- glmmTMB::glmmTMB(crudeprotien ~ drought.x*ldmc+ (1|block), data=foragecomms)) 
 summary(glmmTMB::glmmTMB(drymatter ~ drought.x*ldmc+ (1|block), data=foragecomms))
 
 cpldmcplot<-ggplot(foragecomms, aes(x=ldmc, y=crudeprotien, col=drought.x))+
@@ -378,7 +378,7 @@ cpldmcplot<-ggplot(foragecomms, aes(x=ldmc, y=crudeprotien, col=drought.x))+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")+
+Treatment", x="CWM LDMC", y="Crude protien")+
   theme_classic()
 
 adfldmcplot <-ggplot(foragecomms, aes(x=ldmc, y=ADF, col=drought.x))+
@@ -386,7 +386,7 @@ adfldmcplot <-ggplot(foragecomms, aes(x=ldmc, y=ADF, col=drought.x))+
   geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
-Treatment")+
+Treatment", x="CWM LDMC", y="Acid detergent fiber")+
   theme_classic()
 ##
 
@@ -551,7 +551,7 @@ foragecomms.fd <- merge(forageall23,comms.fd, by.x=c("block","trt"), by.y = c("b
 #   theme_bw()+
 #   facet_wrap(~year)
 
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*rootdiam + (1|block), data=foragecomms.fd)) 
+#summary(cpmod_full<-glmmTMB::glmmTMB(crudeprotien ~ drought.x*rootdiam + (1|block), data=foragecomms.fd)) 
 cpfdrdplot <- ggplot(foragecomms.fd, aes(x=rootdiam, y=crudeprotien, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
@@ -561,7 +561,7 @@ Treatment")+
   theme_classic()+
   theme(axis.title.y.left = element_blank())
 
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*rootdiam + (1|block), data=foragecomms.fd)) 
+#summary(adfmod_full<-glmmTMB::glmmTMB(ADF ~ drought.x*rootdiam + (1|block), data=foragecomms.fd)) 
 adffdrdplot <- ggplot(foragecomms.fd, aes(x=rootdiam, y=ADF, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
@@ -572,7 +572,7 @@ Treatment")+
   theme(axis.title.y.left = element_blank())
 
 
-summary(glmmTMB::glmmTMB(crudeprotien ~ drought.x*full + (1|block), data=foragecomms.fd)) 
+summary(cpmod_ldmc <- glmmTMB::glmmTMB(crudeprotien ~ drought.x*full + (1|block), data=foragecomms.fd)) 
 cpfullplot <- ggplot(foragecomms.fd, aes(x=full, y=crudeprotien, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+
@@ -582,7 +582,7 @@ Treatment")+
   theme_classic()+
   theme(axis.title.y.left = element_blank())
 
-summary(glmmTMB::glmmTMB(ADF ~ drought.x*full + (1|block), data=foragecomms.fd)) 
+summary(adfmod_full <- glmmTMB::glmmTMB(ADF ~ drought.x*full + (1|block), data=foragecomms.fd)) 
 adffullplot <- ggplot(foragecomms.fd, aes(x=rootdiam, y=ADF, col=drought.x))+
   geom_point()+
   geom_smooth(method = "lm")+

@@ -65,9 +65,9 @@ dttemp2 <- coverdat %>%
   group_by(trt, drought2) %>%
   summarise(yposition = quantile(totcov.plot,.9, na.rm = T), .groups = 'drop')
 # Step 5: Merge the letter results with the y-position data
-dttemp2 <- merge(letters_df, dttemp2, by.x = c("drought2", "trt"))#, by.y = c("drought2", "trt"))
+dttemp2 <- merge(letters_df, dttemp2, by = c("drought2", "trt"))#, by.y = c("drought2", "trt"))
 # Merge with the original data to get the final dataset
-dttemp3 <- merge(coverdat, dttemp2, by.x = c("drought2", "trt"))#, by.y = c("drought", "trt"), all = TRUE)
+dttemp3 <- merge(coverdat, dttemp2, by = c("drought2", "trt"))#, by.y = c("drought", "trt"), all = TRUE)
 
 # bocplot (appendix only)
 covtrtplot <- ggplot(dttemp3, aes(x = trt, y = totcov.plot, fill = drought2)) +
@@ -145,7 +145,7 @@ covldmcplot <- ggplot(prod.comms.cwm, aes(x=ldmc, y=totcov.plot, col=drought2))+
     geom_smooth(method="lm")+
     scale_y_continuous(labels = scales::percent) +
     scale_color_manual(values=c("skyblue","tomato2"))+
-    labs(x="CWM LDMC",y="Total absolute plant cover", col="Precipitation
+    labs(x="CWM LDMC",y="Total absolute\n plant cover", col="Precipitation
 treatment")+
     #facet_wrap(~year)+#, scales = "free_x")+
     theme_classic()
@@ -157,7 +157,7 @@ invldmcplot <- ggplot(prod.comms.cwm, aes(x=ldmc, y=propinv, col=drought2))+
   geom_smooth(method="lm")+
   scale_y_continuous(labels = scales::percent) +
   scale_color_manual(values=c("skyblue","tomato2"))+
-  labs(x="CWM LDMC",y="Proportion invasive", col="Precipitation
+  labs(x="CWM LDMC",y="Proportion \n invasive cover", col="Precipitation
 treatment")+
   #facet_wrap(~year)+#, scales = "free_x")+
    theme_classic()#+
@@ -233,7 +233,7 @@ cor.test(prod.comms.fd$full, prod.comms.fd$propinv) #probably needed to justify 
 # withough water, low FD = high inv cover would mean invasive dominate - they never dominate
 summary(invmod_full <- glmmTMB(propinv ~ drought2*full+(1|block), data=prod.comms.fd)) 
 invfullplot <- ggplot(prod.comms.fd, aes(x=full, y=propinv, col=drought2))+
-  geom_point(aes(shape=trt))+
+  geom_point()+#aes(shape=trt))+
   geom_smooth(method="lm")+
   scale_y_continuous(labels = scales::percent) +
   scale_color_manual(values=c("skyblue","tomato2"))+
@@ -242,7 +242,9 @@ treatment")+
   #facet_wrap(~trt)+
   theme_classic() +
   theme(axis.title.y.left = element_blank())
-
+  mutate(droughttrt = recode(droughttrt,
+                            "cntl" = "Ambient",
+                            "drt"  = "Drought"))
 #ldmc and root diam are independent, but full is .6 corr with both
 cor(prod.comms.fd[, c("ldmc", "rootdiam", "full")])
 plotlist <- c(covldmcplot, 

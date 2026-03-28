@@ -138,7 +138,7 @@ Treatment")+
   
 #NO3
 nut23 <- nut23 %>% filter(comm!="IR")
-summary(nutmod<-glmmTMB::glmmTMB(P ~ drt*comm+(1|plot), data=nut23)) #only drought and drought*year matter
+summary(nutmod<-glmmTMB::glmmTMB(NO3 ~ drt*comm+(1|plot), data=nut23)) #only drought and drought*year matter
 summary(lm(NO3 ~ drt*comm*year, data=nut)) #only drought and drought*year matter
 anova(lm(NO3 ~ drt*comm*year, data=nut)) #only drt*year interaction matters
 m14<-ggplot(nut23, aes(x=comm, y=NO3, fill=drt))+
@@ -232,16 +232,17 @@ Treatment")+
   theme_bw()
 
 #Total N ~ srl (higher srl could relate to more root turnover or foraging in low N)
-summary(glmmTMB::glmmTMB(NO3 ~ drt*ldmc+
+summary(nutmod_ldmc<-glmmTMB::glmmTMB(NO3 ~ drt*ldmc+
              (1|plot), data=nutcomms)) #not very sig.
-nutldmcplot<-ggplot(nutcomms, aes(x=ldmc, y=NO3, col=drt))+
+nutcomms <- nutcomms %>% mutate(drought2 = ifelse(drought=="0","ambient", "drought"))
+nutldmcplot<-ggplot(nutcomms, aes(x=ldmc, y=NO3, col=drought2))+
   geom_point()+
-  geom_smooth(method = "lm", se=F)+
+  geom_smooth(method = "lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
 Treatment")+
   #facet_wrap(~year.x)+
-  theme_bw()
+  theme_classic()
 # 
 # 
 # #P ~ leaf N (n and p are related in leaf chemistry and soil colimitation?)
@@ -345,21 +346,24 @@ summary(glmmTMB::glmmTMB(NO3 ~ drt*rootdiam+
                            (1|plot), data=nutcomms.fd)) 
 nutfdrdplot<-ggplot(nutcomms.fd, aes(x=rootdiam, y=NO3, col=drt))+
   geom_point()+
-  geom_smooth(method = "lm", se=F)+
+  #geom_smooth(method = "lm", se=F)+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
 Treatment")+
   #facet_wrap(~year.x)+
-  theme_bw()
+  theme_classic()
 
 #Total N ~ srl (higher srl could relate to more root turnover or foraging in low N)
-summary(glmmTMB::glmmTMB(NO3 ~ drt*full+
+nutcomms.fd <- nutcomms.fd %>% mutate(drought2 = ifelse(drought=="0","ambient", "drought"))
+summary(nutmod_full<-glmmTMB::glmmTMB(NO3 ~ drought2*full+
                            (1|plot), data=nutcomms.fd)) #not very sig.
-nutfullplot<-ggplot(nutcomms.fd, aes(x=full, y=NO3, col=drt))+
+nutfullplot<-ggplot(nutcomms.fd, aes(x=full, y=NO3, col=drought2))+
   geom_point()+
-  geom_smooth(method = "lm", se=F)+
+ # geom_smooth(method = "lm", se=F)+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(col="Precipitation 
 Treatment")+
   #facet_wrap(~year.x)+
-  theme_bw()
+  theme_classic()+
+  theme(axis.title.y.left = element_blank())
+  

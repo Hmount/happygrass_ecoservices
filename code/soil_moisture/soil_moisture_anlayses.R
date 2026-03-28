@@ -194,17 +194,17 @@ smcomms.cwm <- merge(sm_sum,subcomms,
 smcomms.cwm <- smcomms.cwm %>% unite(plot, c(Block, seedtrt), sep = "_", remove=F) # make unique plot variable
 
 
-summary(glmmTMB::glmmTMB(sm_mean ~ droughttrt*ldmc+(1|plot), data=smcomms.cwm)) 
+summary(smmod_ldmc <- glmmTMB::glmmTMB(sm_mean ~ droughttrt*ldmc+(1|Block), data=smcomms.cwm)) 
 #summary(glmmTMB::glmmTMB(moistureyr ~ droughttrt*ldmc+(1|plot), data=smcomms.cwm)) 
 smldmcplot <- ggplot(smcomms.cwm, aes(x=ldmc, y=sm_mean, col=droughttrt))+
   geom_point()+
-  geom_smooth(method="lm")+
+  #geom_smooth(method="lm")+
   scale_color_manual(values=c("skyblue","tomato2"))+
   labs(x="CWM LDMC",y="Soil moisture", col="Precipitation
 treatment")+
   #facet_wrap(~Year, scales = "free")+
-  theme_classic()+
-  theme(axis.title.y.left = element_blank())
+  theme_classic()#+
+  #theme(axis.title.y.left = element_blank())
 
 
 ### What about the relationship between CWM and services?
@@ -261,7 +261,7 @@ treatment")+
 #   theme_classic()+
 #   theme(axis.title.y.left = element_blank())
 
-summary(glmmTMB::glmmTMB(sm_mean ~ droughttrt*full+(1|plot), data=smcomms.fd)) 
+summary(smmod_full<-glmmTMB::glmmTMB(sm_mean ~ droughttrt*full+(1|Block), data=smcomms.fd)) 
 #summary(glmmTMB::glmmTMB(moistureyr ~ droughttrt*ldmc+(1|plot), data=smcomms.cwm)) 
 smfullplot <- ggplot(smcomms.fd, aes(x=full, y=sm_mean, col=droughttrt))+
   geom_point()+
